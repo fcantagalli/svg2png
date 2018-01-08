@@ -1,0 +1,20 @@
+{
+  "files": [
+    {
+      "directory": "ios",
+      "nameSuffix": "@3x",
+      "height": 72,
+      "width": 72
+    },{
+      "directory": "ios",
+      "nameSuffix": "@2x",
+      "height": 48,
+      "width": 48
+    },{
+      "directory": "ios",
+      "nameSuffix": "",
+      "height": 24,
+      "width": 24
+    }
+  ]
+}

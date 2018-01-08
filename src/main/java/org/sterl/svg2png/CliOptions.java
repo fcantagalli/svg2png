@@ -2,14 +2,14 @@ package org.sterl.svg2png;
 
 import java.io.FileInputStream;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sun.istack.internal.NotNull;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
 import org.apache.commons.io.IOUtils;
 import org.sterl.svg2png.config.FileOutput;
 import org.sterl.svg2png.config.OutputConfig;
 import org.sterl.svg2png.util.FileUtil;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 public enum CliOptions {
     FILE("f", null, true, "Source file to convert."),
@@ -26,7 +26,8 @@ public enum CliOptions {
     ANDROID_SMALL(null, "android-small", false, "Android Small default config from mdpi 24x24 -> xxxhdpi 96x96."),
     ANDROID_24dp(null, "android-24dp", false, "Android 24dp icons, with suffix _24dp -- mdpi 24x24 -> xxxhdpi 96x96."),
     ANDROID_36dp(null, "android-36dp", false, "Android 36dp icons, with suffix _36dp -- mdpi 36x36 -> xxxhdpi 144x144."),
-    ANDROID_48dp(null, "android-48dp", false, "Android 48dp icons, with suffix _48dp -- mdpi 48x48 -> xxxhdpi 192x192.")
+    ANDROID_48dp(null, "android-48dp", false, "Android 48dp icons, with suffix _48dp -- mdpi 48x48 -> xxxhdpi 192x192."),
+    IOS(null, "iOS", false, "iOS target icon size 24px -> 3x 72px")
     ;
     
     private final String shortName;
@@ -62,47 +63,21 @@ public enum CliOptions {
                 throw new RuntimeException("Failed to parse config '" + cmd.getOptionValue(CONFIG.shortName) + "'. " + e.getMessage(), e);
             }
         } else if (cmd.hasOption(ANDROID.longName)) {
-            try {
-                result = m.readerFor(OutputConfig.class).readValue(CliOptions.class.getResourceAsStream("/android.json"));
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
+            result = tryOpenFile(m, "/android.json");
         } else if (cmd.hasOption(ANDROID_SMALL.longName)) {
-            try {
-                result = m.readerFor(OutputConfig.class).readValue(CliOptions.class.getResourceAsStream("/android-small.json"));
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
+            result = tryOpenFile(m, "/android-small.json");
         } else if (cmd.hasOption(ANDROID_ICON.longName)) {
-            try {
-                result = m.readerFor(OutputConfig.class).readValue(CliOptions.class.getResourceAsStream("/android-icon.json"));
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
+            result = tryOpenFile(m, "/android-icon.json");
         } else if (cmd.hasOption(ANDROID_LAUNCH.longName)) {
-            try {
-                result = m.readerFor(OutputConfig.class).readValue(CliOptions.class.getResourceAsStream("/android-launcher.json"));
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
+            result = tryOpenFile(m, "/android-launcher.json");
         } else if (cmd.hasOption(ANDROID_24dp.longName)) {
-            try {
-                result = m.readerFor(OutputConfig.class).readValue(CliOptions.class.getResourceAsStream("/android-24dp.json"));
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
+            result = tryOpenFile(m, "/android-24dp.json");
         } else if (cmd.hasOption(ANDROID_36dp.longName)) {
-            try {
-                result = m.readerFor(OutputConfig.class).readValue(CliOptions.class.getResourceAsStream("/android-36dp.json"));
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
+            result = tryOpenFile(m, "/android-36dp.json");
         } else if (cmd.hasOption(ANDROID_48dp.longName)) {
-            try {
-                result = m.readerFor(OutputConfig.class).readValue(CliOptions.class.getResourceAsStream("/android-48dp.json"));
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
+            result = tryOpenFile(m, "/android-48dp.json");
+        } else if (cmd.hasOption(IOS.longName)) {
+            result = tryOpenFile(m, "/ios-small.json");
         } else {
             result = new OutputConfig();
         }
@@ -128,5 +103,13 @@ public enum CliOptions {
         }
 
         return result;
+    }
+
+    static OutputConfig tryOpenFile(@NotNull ObjectMapper m, String filePath) {
+        try {
+            return m.readerFor(OutputConfig.class).readValue(CliOptions.class.getResourceAsStream(filePath));
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 }
